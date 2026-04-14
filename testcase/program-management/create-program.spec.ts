@@ -7,6 +7,7 @@ import {
     fotoTabElements,
     paymentLimitationTabElements,
     salesFeeTabElements,
+    notificationElements,
 } from '../../helpers/elements.helper';
 import { form_daftar_program } from '../../helpers/data.helper';
 
@@ -102,17 +103,18 @@ test.describe.serial('Create Program Flow', () => {
         // ── Step 6: Tab Sales Fee ─────────────────────────────────────────────────
         await test.step('6. Fill Tab Sales Fee', async () => {
             const el = salesFeeTabElements(page);
+            const notify = notificationElements(page);
 
             await el.salesFeeTab.click();
             await el.periodCombobox.selectOption('1');
             await el.agentUplineInput.fill(form_daftar_program.agentUpline);
             await el.agentDownline1Input.fill(form_daftar_program.agentDownline1);
+            
+            // Submitting the final form
             await el.simpanButton.click();
-        });
 
-        // ── Step 7: Logout ────────────────────────────────────────────────────────
-        await test.step('7. Logout', async () => {
-            await logout(page);
+            // Wait for the popup to show on the top right
+            await expect(notify.successPopup).toBeVisible({ timeout: 15000 });
         });
 
     });

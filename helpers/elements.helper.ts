@@ -43,6 +43,15 @@ export function navigationElements(page: Page) {
   };
 }
 
+// ── Notifications / Alerts ─────────────────────────────────────────────────────
+
+export function notificationElements(page: Page) {
+  return {
+    /** The actual text of the success popup */
+    successPopup: page.getByText('Success', { exact: false }),
+  };
+}
+
 // ── User / Profile Menu ───────────────────────────────────────────────────────
 
 export function profileMenuElements(page: Page) {
