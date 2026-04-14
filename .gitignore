@@ -1,10 +1,25 @@
 
-# Playwright
+# ─── Secrets & credentials ───────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+credentials.ts
+config/variables.secret.ts
+
+# ─── Dependencies ────────────────────────────────────────────────────────────
 node_modules/
+
+# ─── Playwright artefacts ────────────────────────────────────────────────────
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
-/variables.ts/
-.env
+
+# ─── Evidence (screenshots & API logs — may contain PII / sensitive data) ───
+/evidence/
+
+# ─── OS / Editor noise ──────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
