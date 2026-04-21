@@ -18,8 +18,8 @@ import 'dotenv/config'; // Load .env before any test resolver runs.
 const runAllBrowsers = process.env.ALL_BROWSERS === 'true';
 
 export default defineConfig({
-  /** Spec files live under testcase/**\/\*.spec.ts */
-  testDir: './testcase',
+  /** Spec files live under test-cases/**\/*.spec.ts */
+  testDir: './test-cases',
 
   /** Run every spec file in parallel; tests within a serial describe are sequential. */
   fullyParallel: true,
