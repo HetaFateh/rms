@@ -1,15 +1,3 @@
-/**
- * test-cases/program-management/create-program.spec.ts
- * ──────────────────────────────────────────────────────────────────────────────
- * Test Suite: Create Program – Full Happy Path
- *
- * Design: "Tidy Spec" pattern.
- *   - This file contains ZERO raw Playwright selectors.
- *   - All interactions are delegated to helper action functions.
- *   - Each test.step() maps 1-to-1 to a business-meaningful action.
- * ──────────────────────────────────────────────────────────────────────────────
- */
-
 import path from 'path';
 import { test, expect } from '../../helpers/base.test';
 import { login } from '../../global/auth';

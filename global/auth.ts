@@ -15,7 +15,7 @@ import { Page, expect } from '@playwright/test';
 
 // ── Role type definitions ─────────────────────────────────────────────────────
 
-export type RoleName = 'admin' | 'agent';
+export type RoleName = 'admin' | 'agent' | 'approver';
 
 export interface UserRole {
   name: RoleName;
@@ -31,6 +31,11 @@ function resolveRole(name: RoleName): UserRole {
       name: 'admin',
       username: process.env.ADMIN_USERNAME ?? '',
       password: process.env.ADMIN_PASSWORD ?? '',
+    },
+    approver: {
+      name: 'approver',
+      username: process.env.APPROVER_USERNAME ?? '',
+      password: process.env.APPROVER_PASSWORD ?? '',
     },
     agent: {
       name: 'agent',

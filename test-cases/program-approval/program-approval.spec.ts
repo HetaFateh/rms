@@ -1,35 +1,63 @@
-/**
- * test-cases/program-approval/program-approval.spec.ts
- * ──────────────────────────────────────────────────────────────────────────────
- * Test Suite: Program Approval
- *
- * STATUS: 🚧 PLACEHOLDER
- *
- * Instructions for the next engineer / AI agent:
- *   1. Implement locators in `helpers/elements/appr-program.helper.ts`.
- *   2. Import and call them here following the "tidy spec" pattern.
- *   3. Keep this file free of raw Playwright selectors — see agents.md.
- * ──────────────────────────────────────────────────────────────────────────────
- */
+import { test, expect } from '../../helpers/base.test';
+import { login, logout } from '../../helpers/elements/auth.helper';
+import { toastElements } from '../../helpers/elements/global.elements';
+import { testToggle }    from '../../test.config';
+import {
+  navigateToProgramApproval,
+  clickApproveIcon,
+  submitApproval,
+} from '../../helpers/elements/appr-program.helper';
+import { form_daftar_program } from '../../helpers/data.helper';
 
-import { test } from '../../helpers/base.test';
-import { login } from '../../global/auth';
-import { apprProgramNavElements } from '../../helpers/elements/appr-program.helper';
+// ── Program name to approve ───────────────────────────────────────────────────
+// Matches the program created in create-program.spec.ts so both flows can run
+// end-to-end in sequence.
+const PROGRAM_NAME = form_daftar_program.name; // 'Test Automation'
 
-test.describe('Program Approval Flow', () => {
+// ── Test Suite ────────────────────────────────────────────────────────────────
 
-  test.skip('TC-PA-001 | Approve a program – full happy path', async ({ page }) => {
-    await test.step('1. Login as Admin', async () => {
-      await login(page, 'admin');
+test.describe.serial('Program Approval Flow', () => {
+
+  // Guard: skip the entire suite when the toggle is off.
+  test.beforeAll(() => {
+    if (!testToggle.runApproveProgram) {
+      test.skip();
+    }
+  });
+
+  test('TC-PA-001 | Approve a program – full happy path', async ({ page }) => {
+
+    // ── Step 1: Login as Approver ─────────────────────────────────────────────
+    await test.step('Approver: Login', async () => {
+      await login(page, 'approver');
     });
 
-    await test.step('2. Navigate to Program Approval', async () => {
-      const nav = apprProgramNavElements(page);
-      await nav.btnManageProgram.click();
-      await nav.linkProgramApproval.click();
+    // ── Step 2: Navigate to Program Approval ──────────────────────────────────
+    await test.step('Approver: Navigate to Program Approval', async () => {
+      await navigateToProgramApproval(page);
     });
 
-    // TODO: Implement remaining steps using appr-program.helper.ts action helpers.
+    // ── Step 3: Open the approval modal for the target program ────────────────
+    await test.step(`Approver: Click approve icon for "${PROGRAM_NAME}"`, async () => {
+      await clickApproveIcon(page, PROGRAM_NAME);
+    });
+
+    // ── Step 4: Select Approve and submit ─────────────────────────────────────
+    await test.step('Approver: Select Approve radio and submit', async () => {
+      await submitApproval(page);
+    });
+
+    // ── Step 5: Assert success toast ──────────────────────────────────────────
+    await test.step('Approver: Verify success notification', async () => {
+      const toast = toastElements(page);
+      await expect(toast.toastSuccess).toBeVisible({ timeout: 15_000 });
+    });
+
+    // ── Step 6: Logout ────────────────────────────────────────────────────────
+    await test.step('Approver: Logout', async () => {
+      await logout(page);
+    });
+
   });
 
 });
