@@ -13,23 +13,35 @@
  */
 
 import { test } from '../../helpers/base.test';
-import { login } from '../../global/auth';
+import { login, logout } from '../../helpers/elements/auth.helper';
+import { testToggle } from '../../test.config';
 import { subsApprNavElements } from '../../helpers/elements/subs-appr.helper';
 
-test.describe('Subscription Approval Flow', () => {
+test.describe.serial('Subscription Approval Flow', () => {
+
+  // Guard: skip the entire suite when the toggle is off.
+  test.beforeAll(() => {
+    if (!testToggle.runApproveSubscription) {
+      test.skip();
+    }
+  });
 
   test.skip('TC-SA-001 | Approve a subscription – full happy path', async ({ page }) => {
-    await test.step('1. Login as Admin', async () => {
+    await test.step('Admin: Login', async () => {
       await login(page, 'admin');
     });
 
-    await test.step('2. Navigate to Subscription Approval', async () => {
+    await test.step('Admin: Navigate to Subscription Approval', async () => {
       const nav = subsApprNavElements(page);
       await nav.btnManageProgram.click();
       await nav.linkSubscribeApproval.click();
     });
 
     // TODO: Implement remaining steps using subs-appr.helper.ts action helpers.
+
+    await test.step('Admin: Logout', async () => {
+      await logout(page);
+    });
   });
 
 });

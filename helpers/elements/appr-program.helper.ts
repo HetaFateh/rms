@@ -59,21 +59,25 @@ export const apprProgramFormElements = (page: Page) => ({
 
 /**
  * Navigate from the dashboard to the Program Approval list page.
+ * For Approver role: After login, click the "Program Approval" link directly.
  */
 export async function navigateToProgramApproval(page: Page): Promise<void> {
-  const nav = apprProgramNavElements(page);
-  await nav.btnManageProgram.click();
-  await nav.linkProgramApproval.click();
+  // Click the "Program Approval" link that's visible after login
+  await page.getByRole('link', { name: 'Program Approval' }).click();
+  
+  // Wait for the page to load
+  await page.waitForLoadState('networkidle');
 }
 
 /**
  * Click the ☑ approve icon for the row matching `programName`.
  * This opens the approval modal/drawer.
+ * If multiple programs have the same name, clicks the first one.
  */
 export async function clickApproveIcon(page: Page, programName: string): Promise<void> {
   const list = apprProgramListElements(page);
   const row  = list.rowByProgramName(programName);
-  await list.btnApproveInRow(row).click();
+  await list.btnApproveInRow(row).first().click();
 }
 
 /**

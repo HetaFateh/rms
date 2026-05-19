@@ -1,292 +1,515 @@
-# agents.md — AI Agent Standards for the RMS Playwright Project
+# AGENTS.md — RMS E2E Framework: Agent Behavioral Guide
 
-> **READ THIS FIRST.**
-> Every AI agent or new engineer working on this project MUST read this document
-> before writing, editing, or deleting a single line of code.
-> Also read **`skills.md`** for implementation patterns and code recipes.
+> **Purpose**: This file defines the critical rules, patterns, and behavioral expectations for AI agents working with this Playwright E2E test framework. It consolidates all mode-specific rules and project-specific patterns into a single source of truth.
 
 ---
 
-## 1. Project Purpose
+## 📋 Table of Contents
 
-This project contains **end-to-end Playwright tests** for the RMS Dashboard (`https://dashboard.rms.dev.atklik.xyz/`).
-The goal is **encapsulation**: spec files call helpers; helpers call Playwright; never the other way around.
-
----
-
-## 2. Canonical Directory Structure
-
-```
-RMS/
-├── global/
-│   └── auth.ts                      # LEGACY — kept for backward compat only. Do NOT import in new specs.
-├── helpers/
-│   ├── base.test.ts                 # Custom test fixture (evidence: screenshots + API logs)
-│   ├── data.helper.ts               # Non-sensitive test data & constants
-│   ├── state.manager.ts             # ★ Singleton store for sharing IDs between test steps
-│   ├── temp_codegen.txt             # Scratch pad for raw Playwright Codegen output (clear after use)
-│   └── elements/
-│       ├── auth.helper.ts           # ★ Auth Hub — login(), logout(), switchRole(), withAuth()
-│       ├── global.elements.ts       # Sidebar, Navbar, Login, Toast locators (app-wide)
-│       ├── program-mgmt.helper.ts   # Program Management locators + action helpers
-│       ├── appr-program.helper.ts   # Program Approval locators + action helpers
-│       ├── subs-appr.helper.ts      # Subscription Approval locators + action helpers
-│       └── <feature>.helper.ts      # Add one file per new feature domain
-├── test-cases/
-│   ├── program-management/
-│   │   ├── create-program.spec.ts
-│   │   └── delete-program.spec.ts
-│   ├── subscription-approval/
-│   │   └── subscription-approval.spec.ts
-│   └── program-approval/
-│       └── program-approval.spec.ts
-├── test-assets/                     # Binary files used in tests (images, PDFs, etc.)
-├── evidence/                        # Auto-generated screenshots & API logs (git-ignored)
-├── test.config.ts                   # ★ The Switchboard — feature toggles (runXxx: true/false)
-├── skills.md                        # ★ Implementation patterns & code recipes for this project
-├── playwright.config.ts
-├── .env                             # Secrets — git-ignored, NEVER commit
-└── .env.example                     # Template — commit this, not .env
-```
-
-★ = new infrastructure files added in v2 of this framework.
+1. [Quick Reference](#quick-reference)
+2. [Mandatory Architecture Rules](#mandatory-architecture-rules)
+3. [File Organization & Imports](#file-organization--imports)
+4. [Code Generation Workflow](#code-generation-workflow)
+5. [Agent Behavioral Patterns](#agent-behavioral-patterns)
+6. [Running Tests](#running-tests)
+7. [Known Gotchas & Fragile Patterns](#known-gotchas--fragile-patterns)
 
 ---
 
-## 3. Naming Conventions
+## Quick Reference
 
-### 3.1 Files
+### Before You Start ANY Task
 
-| Type | Pattern | Example |
-|---|---|---|
-| Element factory + action helpers | `<feature-slug>.helper.ts` | `program-mgmt.helper.ts` |
-| App-wide shared elements | `<scope>.elements.ts` | `global.elements.ts` |
-| Spec files | `<feature>.spec.ts` | `create-program.spec.ts` |
-| Data files | `<scope>.helper.ts` | `data.helper.ts` |
+1. **Read this file first** — All rules are non-negotiable
+2. **Check [`test.config.ts`](test.config.ts)** — Verify toggle exists for your feature
+3. **Review [`skills.md`](skills.md)** — Implementation recipes and patterns
+4. **Scan [`helpers/elements/`](helpers/elements/)** — Reuse existing locators before creating new ones
 
-Feature slugs use **kebab-case** short names: `program-mgmt`, `subs-appr`, `appr-program`.
+### Critical Files
 
-### 3.2 Locator Names (inside element factory objects)
-
-Use camelCase with a **role prefix**:
-
-| Role | Prefix | Example |
-|---|---|---|
-| `<button>` | `btn` | `btnSimpan`, `btnTambahProgram` |
-| `<input type="text">` | `inp` | `inpNama`, `inpKode` |
-| `<textarea>` | `textarea` | `textareaInfo`, `textareaNotifSms` |
-| `<select>` / native combobox | `drp` | `drpPeriod`, `drpStatus` |
-| React-Select input | `dropdown` | `dropdownKategori` |
-| React-Select option | `option` | `optionKvKategoriProgram` |
-| `<input type="file">` | `upload` | `uploadFoto`, `uploadProgramImage` |
-| `<input type="checkbox">` | `checkbox` | `checkboxTelkomsel` |
-| `<a>` / link | `link` | `linkProgramManagement` |
-| `<div role="tab">` | `tab` | `tabFoto`, `tabSalesFee` |
-| Toast / alert text | `toast` | `toastSuccess`, `toastError` |
-| Table | `tbl` | `tblDaftarProgram` |
-| Label | `lbl` | `lblStatusProgram` |
-| General text matcher | `text` | `textWelcome` |
-
-> ⛔ **Forbidden**: generic names like `button1`, `el`, `input2`, raw indices without context.
-
-### 3.3 Action Helper Functions
-
-Use camelCase, prefixed by verb:
-
-- `navigate*` — page/section navigation
-- `fill*` — fills a form section and saves it
-- `approve*`, `reject*` — approval-flow actions
-- `verify*` — assertion helpers (return `void`, use `expect` internally)
-- `switch*` — role transitions
+| File | Purpose | When to Modify |
+|------|---------|----------------|
+| [`test.config.ts`](test.config.ts) | Test execution toggles | **BEFORE** creating any new spec |
+| [`helpers/base.test.ts`](helpers/base.test.ts) | Custom test fixture | Never (unless changing evidence collection) |
+| [`helpers/state.manager.ts`](helpers/state.manager.ts) | Cross-test state sharing | Never (unless adding new state methods) |
+| [`helpers/data.helper.ts`](helpers/data.helper.ts) | Test data constants | When adding new test data |
+| [`helpers/temp_codegen.txt`](helpers/temp_codegen.txt) | Codegen scratch pad | Paste raw codegen, then clear after migration |
 
 ---
 
-## 4. Element Factory Rules (THE IRON LAW)
+## Mandatory Architecture Rules
+
+### 1. Custom Test Fixture (IRON LAW #1)
 
 ```typescript
-// ✅ CORRECT — pure locator factory, no side effects
-export const tabFotoElements = (page: Page) => ({
-  tabFoto:   page.getByRole('tab', { name: 'Foto' }),
-  btnSimpan: page.getByRole('button', { name: 'Simpan' }),
+// ✅ CORRECT — Import from custom fixture
+import { test, expect } from '../../helpers/base.test';
+
+// ❌ WRONG — Breaks evidence collection
+import { test, expect } from '@playwright/test';
+```
+
+**Why?** [`helpers/base.test.ts`](helpers/base.test.ts:18-64) extends Playwright's test fixture to:
+- Auto-capture JPEG screenshots (50% quality) after EVERY test
+- Log all API calls (excluding static assets) to `./evidence/`
+- Attach evidence to HTML reports with pass/fail labels
+
+**Consequence of violation**: No screenshots, no API logs, debugging becomes impossible.
+
+---
+
+### 2. Auth Hub (IRON LAW #2)
+
+```typescript
+// ✅ CORRECT — Use the new auth hub
+import { login, logout, switchRole, withAuth } from '../../helpers/elements/auth.helper';
+
+// ❌ WRONG — Legacy file, DO NOT import in new specs
+import { login } from '../../global/auth';
+```
+
+**Why?** [`global/auth.ts`](global/auth.ts) is kept ONLY for backward compatibility with existing specs. All new code MUST use [`helpers/elements/auth.helper.ts`](helpers/elements/auth.helper.ts).
+
+**Login verification pattern**:
+```typescript
+// ✅ CORRECT — URL-based verification (time-independent)
+await page.waitForURL('**/main/**');
+
+// ❌ WRONG — Greeting text changes by time of day
+await expect(page.getByText('Selamat Pagi')).toBeVisible();
+```
+
+---
+
+### 3. Element Factory Pattern (IRON LAW #3)
+
+**The Golden Rule**: Factories return **plain `Locator` objects** — NO `await`, NO `.click()`, NO `.fill()`.
+
+```typescript
+// ✅ CORRECT — Section 1: Pure locator factory
+export const programElements = (page: Page) => ({
+  btnSave:    page.getByRole('button', { name: 'Simpan' }),
+  inputName:  page.locator('input[name="NAMA"]'),
+  drpStatus:  page.getByRole('combobox', { name: 'Status' }),
 });
 
-// ❌ WRONG — await and actions inside a factory
-export const tabFotoElements = (page: Page) => ({
-  tabFoto: await page.getByRole('tab', { name: 'Foto' }).click(), // NEVER
+// ✅ CORRECT — Section 2: Async action helper
+export async function fillProgramForm(page: Page, data: { name: string }): Promise<void> {
+  const el = programElements(page);
+  await el.inputName.fill(data.name);
+  await el.btnSave.click();
+}
+
+// ❌ WRONG — await inside factory
+export const programElements = (page: Page) => ({
+  btnSave: await page.getByRole('button').click(), // NEVER DO THIS
 });
 ```
 
-**Rules:**
-1. Element factories are **plain synchronous functions** returning a plain object of `Locator` values.
-2. **No `await`**, **no `.click()`**, **no `.fill()`** inside factory return objects.
-3. Actions only live in `async` action helper functions (Section 2 of each helper file).
-4. One `page: Page` argument only — no other parameters.
+**Why?** Locators are lazy — they don't query the DOM until an action is performed. Mixing locator creation with actions breaks this pattern and causes race conditions.
 
 ---
 
-## 5. Spec File Rules (Tidy Spec Pattern)
+### 4. State Manager (IRON LAW #4)
+
+[`helpers/state.manager.ts`](helpers/state.manager.ts) is a **singleton** that shares state within the same Playwright worker.
 
 ```typescript
-// ✅ CORRECT — spec imports helpers and calls them
-import { test, expect }    from '../../helpers/base.test';
-import { login, logout }   from '../../helpers/elements/auth.helper';  // ← always auth.helper, not global/auth
-import { testToggle }      from '../../test.config';
-import { stateManager }    from '../../helpers/state.manager';
-import { fillTabProgram }  from '../../helpers/elements/program-mgmt.helper';
+import { stateManager } from '../../helpers/state.manager';
 
-test.describe.serial('Feature Flow', () => {
-  test.beforeAll(() => {
-    if (!testToggle.runCreateProgram) test.skip();
-  });
+// In test A (creator)
+stateManager.set('programId', '42');
 
-  test('TC-PM-001 | ...', async ({ page }) => {
-    await test.step('Admin: Login', async () => { await login(page, 'admin'); });
-    await test.step('Admin: Fill Tab Program', async () => { await fillTabProgram(page, IMAGE_PATH); });
-    await test.step('Admin: Logout', async () => { await logout(page); });
-  });
+// In test B (consumer, same worker)
+const id = stateManager.require<string>('programId'); // throws if missing
+
+// Guard dependent tests
+test.beforeAll(() => {
+  if (!stateManager.get('programId')) {
+    test.skip(true, 'programId not set — run create-program first');
+  }
 });
 
-// ❌ WRONG — raw selectors in a spec file
-test('TC-001 | ...', async ({ page }) => {
-  await page.locator('input[name="NAMA"]').fill('Test');  // NEVER
+// Cleanup (MANDATORY in afterAll)
+test.afterAll(() => {
+  stateManager.clear();
 });
 ```
 
-**Rules:**
-1. Spec files import **only** from `helpers/`, `test.config.ts`, and Node built-ins.
-2. ⛔ **Never** import from `global/auth.ts` in new specs — use `auth.helper.ts`.
-3. Zero raw Playwright selectors directly in a spec file.
-4. Use `test.step('Role: Action', ...)` — step label must include the acting role.
-5. Test IDs follow: `TC-<FEATURE_CODE>-<###>` (e.g., `TC-SA-001`).
-6. Guard every spec with a `testToggle` check in `beforeAll`.
+**Critical behaviors**:
+- State persists across tests in the **same worker only**
+- Parallel workers do NOT share state
+- `require<T>()` throws if key is missing — use `test.skip()` to guard
+- MUST call `clear()` in `afterAll` to prevent cross-suite pollution
 
 ---
 
-## 6. Feature Split Strategy
+### 5. Test Toggle Switchboard (IRON LAW #5)
 
-Helpers are split **by feature domain**, not by page. Each domain gets one helper file.
+[`test.config.ts`](test.config.ts) is the **ONLY** place to enable/disable test execution.
 
-| Feature | Helper File | Spec File(s) | Toggle Key |
-|---|---|---|---|
-| Authentication | `auth.helper.ts` | — (imported by all) | — |
-| Program Management | `program-mgmt.helper.ts` | `create-program.spec.ts`, `delete-program.spec.ts` | `runCreateProgram`, `runDeleteProgram` |
-| Subscription Approval | `subs-appr.helper.ts` | `subscription-approval.spec.ts` | `runApproveSubscription` |
-| Program Approval | `appr-program.helper.ts` | `program-approval.spec.ts` | `runApproveProgram` |
-| App-wide (sidebar, navbar) | `global.elements.ts` | — (imported by all) | — |
-
-**When to create a new helper file:** When a new feature module requires ≥ 3 unique locators that don't belong to any existing helper.
-
----
-
-## 7. Infrastructure Files (v2)
-
-### 7.1 Auth Hub — `helpers/elements/auth.helper.ts`
-
-Single source of truth for all authentication. Always import from here in new specs.
-
-| Export | Description |
-|---|---|
-| `login(page, role)` | Navigate to app and authenticate |
-| `logout(page)` | Sign out and confirm landing page |
-| `switchRole(page, role)` | Full `logout()` → `login()` (session isolation) |
-| `withAuth(page, role, fn)` | Wrapper: login → run fn → logout (even on error) |
-
-> ⚠️ Login success is confirmed via `page.waitForURL('**/main/**')`, **not** by greeting text,
-> because the greeting changes by time of day (*Selamat Pagi / Siang / Malam*).
-
-### 7.2 State Manager — `helpers/state.manager.ts`
-
-Singleton in-memory store for sharing transient data (e.g. `programId`) between dependent test steps.
+**Workflow for new specs**:
+1. Add toggle key to [`test.config.ts`](test.config.ts:17-48) **FIRST**
+2. Guard spec with toggle in `beforeAll`
 
 ```typescript
-stateManager.set('programId', '42');          // store
-stateManager.get<string>('programId');         // retrieve (undefined if missing)
-stateManager.require<string>('programId');     // retrieve or throw (use for hard dependencies)
-stateManager.clear();                          // wipe — call in afterAll
-```
+// Step 1: Add to test.config.ts
+export const testToggle = {
+  runMyNewFeature: true, // TC-XX-001: Description
+};
 
-Use `test.skip()` when a required key is absent to avoid false failures:
-```typescript
-if (!stateManager.get('programId')) test.skip(true, 'Need programId from create step');
-```
-
-### 7.3 The Switchboard — `test.config.ts`
-
-Central feature toggle registry.
-
-```typescript
+// Step 2: Guard spec file
 import { testToggle } from '../../test.config';
 
-// In beforeAll:
-if (!testToggle.runApproveProgram) test.skip();
+test.describe.serial('My New Feature', () => {
+  test.beforeAll(() => {
+    if (!testToggle.runMyNewFeature) test.skip();
+  });
+  
+  test('TC-XX-001 | Happy path', async ({ page }) => { ... });
+});
 ```
 
-**⚠️ MANDATORY:** Every new test case added to the suite **MUST** have a corresponding key in `test.config.ts`.
+**Why?** Centralized control prevents scattered `test.skip()` calls and makes it trivial to disable entire feature suites.
 
 ---
 
-## 8. Locator Priority (Most to Least Stable)
+## File Organization & Imports
 
-1. `getByTestId` — requires `data-testid` attr ✅ best
-2. `getByRole` — semantic, language-agnostic ✅ preferred
-3. `getByLabel` — form fields with `<label>` ✅ good
-4. `locator('[name="…"]')` — stable if server-rendered ✅ acceptable
-5. `locator('#id')` — only if static ⚠️ use with caution
-6. CSS / XPath — **last resort**; always add `// ⚠️` comment explaining why
+### Directory Structure
 
-Placeholder rule: if a locator is genuinely unknown, use:
+```
+c:/Users/asset/OneDrive/Documents/RMS/
+├── helpers/
+│   ├── base.test.ts          ← Custom test fixture (import test from here)
+│   ├── state.manager.ts      ← Cross-test state sharing
+│   ├── data.helper.ts        ← Test data constants
+│   ├── temp_codegen.txt      ← Codegen scratch pad (clear after use)
+│   └── elements/
+│       ├── auth.helper.ts    ← Login/logout/switchRole (NEW)
+│       ├── global.elements.ts ← Shared UI elements
+│       ├── program-mgmt.helper.ts
+│       ├── appr-program.helper.ts
+│       └── subs-appr.helper.ts
+├── test-cases/
+│   ├── program-management/
+│   ├── program-approval/
+│   ├── subscription-approval/
+│   └── user-management/
+├── test.config.ts            ← Test toggles (MANDATORY registration)
+├── playwright.config.ts      ← Playwright settings
+├── AGENTS.md                 ← This file
+└── skills.md                 ← Implementation recipes
+```
+
+### Import Rules
+
 ```typescript
-page.locator('//PLACEHOLDER_FOR_[NAME]') // TODO: replace with stable locator
+// ✅ CORRECT — Standard spec file imports
+import { test, expect } from '../../helpers/base.test';
+import { login, logout } from '../../helpers/elements/auth.helper';
+import { testToggle } from '../../test.config';
+import { stateManager } from '../../helpers/state.manager';
+import { TEST_DATA } from '../../helpers/data.helper';
+
+// ❌ WRONG — Never import these in new specs
+import { test } from '@playwright/test';           // Breaks evidence collection
+import { login } from '../../global/auth';         // Legacy file
+```
+
+### Helper File Structure
+
+Every helper file in [`helpers/elements/`](helpers/elements/) follows this pattern:
+
+```typescript
+import { Page, Locator } from '@playwright/test';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Section 1: Element Factories (Pure Locators)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const myFeatureElements = (page: Page) => ({
+  btnSave:    page.getByRole('button', { name: 'Simpan' }),
+  inputName:  page.locator('input[name="NAMA"]'),
+  // ⚠️ Fragile: CSS class auto-generated by React-Select
+  dropdownKategori: page.locator('.css-19bb58m'),
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Section 2: Action Helpers (Async Functions)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function fillMyForm(page: Page, data: { name: string }): Promise<void> {
+  const el = myFeatureElements(page);
+  await el.inputName.fill(data.name);
+  await el.btnSave.click();
+}
 ```
 
 ---
 
-## 9. Adding a New Feature (Step-by-Step)
+## Code Generation Workflow
 
-1. **Codegen**: Run `npx playwright codegen <url>` → paste into `helpers/temp_codegen.txt`.
-2. **Toggle**: Add `runMyNewFeature: true` to `test.config.ts` ← **do this first**.
-3. **Elements**: Create `helpers/elements/<slug>.helper.ts`.
-   - Section 1: Element factories (no `await`).
-   - Section 2: Action helpers (`async` functions).
-4. **Data**: Add constants to `helpers/data.helper.ts`.
-5. **Spec**: Create `test-cases/<feature>/<feature>.spec.ts` — import only from helpers.
-6. **Cleanup**: Clear `temp_codegen.txt` after migration.
-7. **Update docs**: Add new feature row to the table in §6.
-
----
-
-## 10. Environment Variables
-
-All secrets live in `.env` (git-ignored). Never hardcode credentials.
-
-| Variable | Purpose |
-|---|---|
-| `BASE_URL` | Target application URL |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Admin role credentials |
-| `APPROVER_USERNAME` / `APPROVER_PASSWORD` | Approver role credentials |
-| `AGENT_USERNAME` / `AGENT_PASSWORD` | Agent role credentials |
-| `EVIDENCE_DIR` | Output directory for screenshots/logs (default: `./evidence`) |
-
-Copy `.env.example` → `.env` and fill in values before running.
-
----
-
-## 11. Running Tests
+### Using Playwright Codegen
 
 ```powershell
-# Run all tests
-npx playwright test
+# 1. Start codegen
+npx playwright codegen https://dashboard.rms.dev.atklik.xyz/
 
-# Run a single spec
+# 2. Perform actions in browser
+# 3. Copy generated code
+# 4. Paste into helpers/temp_codegen.txt
+```
+
+### Migration Checklist
+
+```
+1. [ ] Paste raw codegen output into helpers/temp_codegen.txt
+2. [ ] Create or update helpers/elements/<feature>.helper.ts
+3. [ ] Extract locators into Section 1 (element factories)
+4. [ ] Extract actions into Section 2 (async functions)
+5. [ ] Apply naming conventions (see skills.md §6)
+6. [ ] Tag fragile selectors with // ⚠️ comment
+7. [ ] Add test data to helpers/data.helper.ts if needed
+8. [ ] Clear helpers/temp_codegen.txt
+```
+
+**Naming conventions** (see [`skills.md`](skills.md:125-142) for full table):
+- `btn` → buttons
+- `inp` → text inputs
+- `drp` → native `<select>` dropdowns
+- `dropdown` → React-Select components
+- `checkbox` → checkboxes
+- `tab` → tab elements
+- `toast` → toast/alert messages
+
+---
+
+## Agent Behavioral Patterns
+
+### When Creating New Code
+
+1. **Always check existing helpers first** — Reuse locators before creating duplicates
+2. **Read related spec files** — Understand existing patterns before implementing
+3. **Follow the Element Factory Pattern** — Section 1 (locators) + Section 2 (actions)
+4. **Register toggle in test.config.ts** — BEFORE writing the spec file
+5. **Use test.step() with role prefix** — Format: `'Role: Action'`
+
+### When Modifying Existing Code
+
+1. **Read the entire file first** — Understand context before making changes
+2. **Preserve existing patterns** — Don't introduce new styles
+3. **Update related files** — If changing a helper, check all specs that import it
+4. **Test locally** — Run affected specs before marking complete
+
+### When Debugging
+
+1. **Check evidence folder** — Screenshots + API logs are auto-captured
+2. **Verify toggle is enabled** — Check [`test.config.ts`](test.config.ts)
+3. **Check state manager** — Use `stateManager.get()` to inspect state
+4. **Run single spec** — `npx playwright test path/to/spec.ts`
+
+### Code Encapsulation Rules
+
+**ALWAYS follow these encapsulation patterns**:
+
+1. **No raw selectors in spec files** — All locators via helper factories
+2. **No business logic in spec files** — Extract to helper functions
+3. **No hardcoded data in spec files** — Use [`helpers/data.helper.ts`](helpers/data.helper.ts)
+4. **No duplicate locators** — Reuse existing factories
+5. **No mixed concerns** — Locators in Section 1, actions in Section 2
+
+**Example of proper encapsulation**:
+
+```typescript
+// ❌ WRONG — Raw selector + business logic in spec
+test('Create program', async ({ page }) => {
+  await page.locator('input[name="NAMA"]').fill('Test Program');
+  await page.getByRole('button', { name: 'Simpan' }).click();
+  await page.waitForURL('**/main/**');
+});
+
+// ✅ CORRECT — Encapsulated in helper
+test('Create program', async ({ page }) => {
+  await test.step('Admin: Fill program form', async () => {
+    await fillProgramForm(page, TEST_DATA.program.valid);
+  });
+});
+```
+
+### When Asked to Implement a Feature
+
+**Standard workflow**:
+
+```
+1. Read AGENTS.md (this file) — Understand rules
+2. Read skills.md — Find implementation recipe
+3. Check test.config.ts — Verify toggle exists or add it
+4. Scan helpers/elements/ — Reuse existing locators
+5. Read related spec files — Understand patterns
+6. Implement following Element Factory Pattern
+7. Add test data to data.helper.ts if needed
+8. Write spec with proper test.step() labels
+9. Clear temp_codegen.txt if used
+```
+
+---
+
+## Running Tests
+
+### Single Spec
+
+```powershell
 npx playwright test test-cases/program-management/create-program.spec.ts
+```
 
-# Run with all browsers
+### All Tests (Chromium Only)
+
+```powershell
+npx playwright test
+```
+
+### All Browsers
+
+```powershell
+# PowerShell
 $env:ALL_BROWSERS="true"; npx playwright test
 
-# View HTML report
+# CMD
+set ALL_BROWSERS=true && npx playwright test
+
+# Mac/Linux
+ALL_BROWSERS=true npx playwright test
+```
+
+### View HTML Report
+
+```powershell
 npx playwright show-report
 ```
 
 ---
 
-*Last updated: 2026-04-22 | v2.0 — Master E2E Framework | Maintained by the QA Automation Architect.*
+## Known Gotchas & Fragile Patterns
+
+### 1. Time-Dependent Greeting Text
+
+```typescript
+// ❌ WRONG — Fails at different times of day
+await expect(page.getByText('Selamat Pagi')).toBeVisible();
+
+// ✅ CORRECT — Time-independent URL check
+await page.waitForURL('**/main/**');
+```
+
+**Why?** Greeting changes: `Selamat Pagi` (morning) → `Selamat Siang` (afternoon) → `Selamat Malam` (evening).
+
+---
+
+### 2. React-Select Auto-Generated Classes
+
+```typescript
+// ⚠️ FRAGILE — Will break on library updates
+const dropdownKategori = page.locator('.css-19bb58m');
+```
+
+**Fix**: Tag with `// ⚠️` comment and replace with `data-testid` when available.
+
+---
+
+### 3. State Manager Cross-Worker Isolation
+
+```typescript
+// ❌ WRONG — Assumes state is shared across parallel workers
+const id = stateManager.require<string>('programId'); // May throw in parallel run
+
+// ✅ CORRECT — Guard dependent tests
+test.beforeAll(() => {
+  if (!stateManager.get('programId')) {
+    test.skip(true, 'programId not set — run create-program first');
+  }
+});
+```
+
+**Why?** Each Playwright worker is a separate process with its own state manager instance.
+
+---
+
+### 4. Parallel Test Execution
+
+```typescript
+// ✅ CORRECT — Use serial for dependent tests
+test.describe.serial('Program E2E Flow', () => {
+  test('Create program', async ({ page }) => { ... });
+  test('Approve program', async ({ page }) => { ... });
+});
+
+// ❌ WRONG — Parallel execution breaks dependencies
+test.describe('Program E2E Flow', () => {
+  test('Create program', async ({ page }) => { ... });
+  test('Approve program', async ({ page }) => { ... }); // May run before create
+});
+```
+
+---
+
+### 5. Evidence Collection Timing
+
+Evidence (screenshots + API logs) is captured **after each test completes**, not during execution. If you need mid-test screenshots, use:
+
+```typescript
+await page.screenshot({ path: `./evidence/debug-${Date.now()}.jpg` });
+```
+
+---
+
+## Mode-Specific Notes
+
+### Code Mode
+- No access to MCP servers or browser automation tools
+- Use only file operations and command execution
+- Follow all architecture rules above
+
+### Advanced Mode
+- HAS access to MCP servers and browser automation tools
+- Can use additional tools beyond standard file operations
+- Follow all architecture rules above
+
+### Ask Mode
+- Focus on explaining architecture and patterns
+- Reference this file and [`skills.md`](skills.md) for answers
+- Highlight non-obvious behaviors and gotchas
+
+---
+
+## Quick Checklist for New Features
+
+```
+Before writing ANY code:
+[ ] Read AGENTS.md (this file)
+[ ] Read skills.md for implementation recipes
+[ ] Add toggle to test.config.ts
+[ ] Check helpers/elements/ for reusable locators
+[ ] Review similar existing specs
+
+While implementing:
+[ ] Import test from helpers/base.test.ts
+[ ] Import auth from helpers/elements/auth.helper.ts
+[ ] Follow Element Factory Pattern (Section 1 + 2)
+[ ] Use test.step() with 'Role: Action' format
+[ ] Tag fragile selectors with // ⚠️
+[ ] Add test data to helpers/data.helper.ts
+[ ] Guard spec with toggle in beforeAll
+[ ] Clear state in afterAll if using stateManager
+
+After implementation:
+[ ] Clear helpers/temp_codegen.txt if used
+[ ] Run spec locally to verify
+[ ] Check evidence folder for screenshots/logs
+```
+
+---
+
+**Last Updated**: 2026-05-19  
+**Maintained By**: QA Automation Architect  
+**Companion File**: [`skills.md`](skills.md) — Implementation recipes and code patterns

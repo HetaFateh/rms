@@ -21,15 +21,29 @@ export const testToggle = {
   runCreateProgram:       true,
 
   /** TC-PM-002: Delete an existing program */
-  runDeleteProgram:       true,
+  runDeleteProgram:       false,
 
   // ── Program Approval ──────────────────────────────────────────────────────
-  /** TC-PA-001: Approve a program (full happy path) */
-  runApproveProgram:      true,
+  /** TC-PA-002: Approve existing program (approval only, no creation) */
+  runApproveExistingProgram: true,
+
+  /** TC-PA-E2E-001: Create and approve program (full E2E flow) */
+  runApproveProgramE2E:   true,
+
+  /** TC-PA-E2E-002: Edit existing program and approve (full E2E flow) */
+  runEditProgramE2E:      true,
 
   // ── Subscription Approval ─────────────────────────────────────────────────
   /** TC-SA-001: Approve a subscription (full happy path) */
-  runApproveSubscription: true,
+  runApproveSubscription: false,
+
+  // ── User Management ───────────────────────────────────────────────────────
+  /** TC-UP-001: View and edit user profile */
+  runEditProfile:         true,
+
+  // ── Dashboard ─────────────────────────────────────────────────────────────
+  /** TC-DB-001, TC-DB-002: Dashboard navigation and menu exploration */
+  runDashboardNavigation: true,
 
 } as const;
 

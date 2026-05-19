@@ -87,8 +87,12 @@ export async function login(page: Page, roleName: RoleName = 'admin'): Promise<v
   const role = resolveRole(roleName);
   const el   = loginElements(page);
 
+  // Clear cookies to ensure clean session
+  await page.context().clearCookies();
+  
   await page.goto(BASE_URL);
 
+  // Wait for login page to be ready
   await expect(el.btnMasuk).toBeVisible({ timeout: 10_000 });
   await el.btnMasuk.click();
 
@@ -99,6 +103,9 @@ export async function login(page: Page, roleName: RoleName = 'admin'): Promise<v
   // Confirm successful login — wait for dashboard URL rather than greeting text,
   // because the greeting changes based on time of day (Selamat Pagi / Siang / Malam).
   await page.waitForURL('**/main/**', { timeout: 15_000 });
+  
+  // Wait for page to fully load after login
+  await page.waitForLoadState('networkidle');
 }
 
 /**

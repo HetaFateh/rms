@@ -6,9 +6,9 @@
  */
 
 export const form_daftar_program = {
-    name:             'Test Automation',
-    code:             'TestAutomation',
-    redirectLink:     'www.google.com',
+    name:             'Test ShareLink',
+    code:             'TestShareLink',
+    redirectLink:     'www.telkomsel.com',
     maxPoin:          '20',
     budget:           '30',
     thresholdBudget:  '50',
@@ -16,4 +16,5 @@ export const form_daftar_program = {
     agentDownline1:   '30',
     thresholdExpired: '2',
     wording:          'Test Automation {produk} & {url}',
+    benefit:      'TestAutomationBenefit',
 };
