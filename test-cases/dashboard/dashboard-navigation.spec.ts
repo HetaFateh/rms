@@ -6,9 +6,7 @@ import { testToggle } from '../../test.config';
 test.describe.serial('Dashboard Navigation Flow', () => {
 
   test.beforeAll(() => {
-    if (!testToggle.runDashboardNavigation) {
-      test.skip();
-    }
+    if (!testToggle.runDashboardNavigation) test.skip();
   });
 
   test('TC-DB-001 | Navigate to Dashboard and verify key elements', async ({ page }) => {
@@ -22,13 +20,11 @@ test.describe.serial('Dashboard Navigation Flow', () => {
     });
 
     await test.step('Admin: Click Dashboard link', async () => {
-      const sidebar = sidebarElements(page);
-      await sidebar.linkDashboard.click();
-      await page.waitForTimeout(2000);
+      await sidebarElements(page).linkDashboard.click();
+      await page.waitForLoadState('networkidle');
     });
 
     await test.step('Admin: Verify Dashboard page loaded', async () => {
-      // Dashboard should have some content - check for common elements
       const hasContent = await page.locator('body').textContent();
       expect(hasContent).toBeTruthy();
     });
@@ -58,8 +54,6 @@ test.describe.serial('Dashboard Navigation Flow', () => {
     for (const section of menuSections) {
       await test.step(`Admin: Expand ${section.name} menu`, async () => {
         await section.button.click();
-        await page.waitForTimeout(1000);
-        // Verify menu expanded by checking if button is still visible
         await expect(section.button).toBeVisible();
       });
     }
@@ -69,7 +63,4 @@ test.describe.serial('Dashboard Navigation Flow', () => {
     });
 
   });
-
 });
-
-// Made with Bob

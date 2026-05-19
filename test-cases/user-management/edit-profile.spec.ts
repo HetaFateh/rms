@@ -6,9 +6,7 @@ import { testToggle } from '../../test.config';
 test.describe.serial('Edit Profile Flow', () => {
 
   test.beforeAll(() => {
-    if (!testToggle.runEditProfile) {
-      test.skip();
-    }
+    if (!testToggle.runEditProfile) test.skip();
   });
 
   test('TC-UP-001 | View Edit Profile page', async ({ page }) => {
@@ -18,13 +16,11 @@ test.describe.serial('Edit Profile Flow', () => {
     });
 
     await test.step('Admin: Navigate to Edit Profile', async () => {
-      const sidebar = sidebarElements(page);
-      await sidebar.linkEditProfile.click();
-      await page.waitForTimeout(2000);
+      await sidebarElements(page).linkEditProfile.click();
+      await page.waitForURL(/.*edit-profile.*/);
     });
 
     await test.step('Admin: Verify Edit Profile page loaded', async () => {
-      // Verify we're on the edit profile page
       await expect(page).toHaveURL(/.*edit-profile.*/);
     });
 
@@ -33,7 +29,4 @@ test.describe.serial('Edit Profile Flow', () => {
     });
 
   });
-
 });
-
-// Made with Bob

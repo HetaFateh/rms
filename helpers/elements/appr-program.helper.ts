@@ -62,10 +62,8 @@ export const apprProgramFormElements = (page: Page) => ({
  * For Approver role: After login, click the "Program Approval" link directly.
  */
 export async function navigateToProgramApproval(page: Page): Promise<void> {
-  // Click the "Program Approval" link that's visible after login
-  await page.getByRole('link', { name: 'Program Approval' }).click();
-  
-  // Wait for the page to load
+  const nav = apprProgramNavElements(page);
+  await nav.linkProgramApproval.click();
   await page.waitForLoadState('networkidle');
 }
 

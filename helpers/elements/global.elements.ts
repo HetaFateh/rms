@@ -14,7 +14,7 @@
  * ──────────────────────────────────────────────────────────────────────────────
  */
 
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 
 // ── Login Page ────────────────────────────────────────────────────────────────
 
@@ -23,8 +23,6 @@ export const loginElements = (page: Page) => ({
   btnMasuk:        page.getByRole('button', { name: 'Masuk' }),
   inputUsername:   page.getByRole('textbox', { name: /username/i }),
   inputPassword:   page.getByRole('textbox', { name: /password/i }),
-  /** Post-login greeting text visible on the dashboard */
-  textWelcome:     page.getByText('Selamat Pagi'),
 });
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
@@ -96,3 +94,7 @@ export const toastElements = (page: Page) => ({
   /** Generic error toast (any text containing "Error") */
   toastError:   page.getByText('Error',   { exact: false }),
 });
+
+export async function expectSuccessToast(page: Page, timeout = 15_000): Promise<void> {
+  await expect(toastElements(page).toastSuccess).toBeVisible({ timeout });
+}

@@ -18,7 +18,7 @@
 
 import { Page } from '@playwright/test';
 import { sidebarElements } from './global.elements';
-import { form_daftar_program } from '../data.helper';
+import { TEST_DATA } from '../data.helper';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SECTION 1 – ELEMENT FACTORIES
@@ -151,11 +151,11 @@ export async function navigateToCreateProgram(page: Page): Promise<void> {
 export async function fillTabProgram(page: Page, imagePath: string): Promise<void> {
   const el = tabProgramElements(page);
 
-  await el.inputNama.fill(form_daftar_program.name);
-  await el.inputKode.fill(form_daftar_program.code);
-  await el.inputThresholdExpired.fill(form_daftar_program.thresholdExpired);
-  await el.textareaInfo.fill(form_daftar_program.name);
-  await el.inputPromoId.fill(form_daftar_program.benefit);
+  await el.inputNama.fill(TEST_DATA.program.name);
+  await el.inputKode.fill(TEST_DATA.program.code);
+  await el.inputThresholdExpired.fill(TEST_DATA.program.thresholdExpired);
+  await el.textareaInfo.fill(TEST_DATA.program.name);
+  await el.inputPromoId.fill(TEST_DATA.program.benefit);
 
   // React-Select dropdowns
   // ⚠️ These rely on brittle CSS selectors — tag for data-testid once available.
@@ -176,17 +176,17 @@ export async function fillTabProgram(page: Page, imagePath: string): Promise<voi
 
   await el.btnSimpan.click();
 
-  await el.textareaKvWording.fill(form_daftar_program.name);
+  await el.textareaKvWording.fill(TEST_DATA.program.name);
   await el.uploadProgramImage.setInputFiles(imagePath);
-  await el.inputRedirectLink.fill(form_daftar_program.redirectLink);
-  await el.inputMaxPoin.fill(form_daftar_program.maxPoin);
-  await el.inputBudget.fill(form_daftar_program.budget);
-  await el.inputThresholdBudget.fill(form_daftar_program.thresholdBudget);
+  await el.inputRedirectLink.fill(TEST_DATA.program.redirectLink);
+  await el.inputMaxPoin.fill(TEST_DATA.program.maxPoin);
+  await el.inputBudget.fill(TEST_DATA.program.budget);
+  await el.inputThresholdBudget.fill(TEST_DATA.program.thresholdBudget);
 
   await el.dropdownChannel.click();
   await el.optionKvChannel.click();
 
-  await el.textareaNotifSms.fill(form_daftar_program.name);
+  await el.textareaNotifSms.fill(TEST_DATA.program.name);
   await el.checkboxTelkomsel.check();
   await el.checkboxNonTelkomsel.check();
 }
@@ -200,9 +200,9 @@ export async function fillTabFoto(page: Page, imagePath: string): Promise<void> 
 
   await el.tabFoto.click();
   await el.uploadFoto.setInputFiles(imagePath);
-  await el.inputFotoJudul.fill(form_daftar_program.name);
-  await el.textareaFotoDeskripsi.fill(form_daftar_program.name);
-  await el.inputWording.fill(form_daftar_program.wording);
+  await el.inputFotoJudul.fill(TEST_DATA.program.name);
+  await el.textareaFotoDeskripsi.fill(TEST_DATA.program.name);
+  await el.inputWording.fill(TEST_DATA.program.wording);
   await el.btnTambahWording.click();
 }
 
@@ -228,8 +228,8 @@ export async function fillTabSalesFee(page: Page): Promise<void> {
 
   await el.tabSalesFee.click();
   await el.comboboxPeriod.selectOption('1');
-  await el.inputAgentUpline.fill(form_daftar_program.agentUpline);
-  await el.inputAgentDownline1.fill(form_daftar_program.agentDownline1);
+  await el.inputAgentUpline.fill(TEST_DATA.program.agentUpline);
+  await el.inputAgentDownline1.fill(TEST_DATA.program.agentDownline1);
   await el.btnSimpan.click();
 }
 

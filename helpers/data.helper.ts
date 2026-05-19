@@ -1,11 +1,7 @@
-/**
- * helpers/data.helper.ts
- * ──────────────────────────────────────────────────────────────────────────────
- * Non-sensitive test data and constants used across test specs.
- * ──────────────────────────────────────────────────────────────────────────────
- */
+import path from 'path';
 
-export const form_daftar_program = {
+export const TEST_DATA = {
+  program: {
     name:             'Test ShareLink',
     code:             'TestShareLink',
     redirectLink:     'www.telkomsel.com',
@@ -16,5 +12,7 @@ export const form_daftar_program = {
     agentDownline1:   '30',
     thresholdExpired: '2',
     wording:          'Test Automation {produk} & {url}',
-    benefit:      'TestAutomationBenefit',
-};
+    benefit:          'TestAutomationBenefit',
+  },
+  imagePath: path.join(__dirname, '../test-assets/promofm.jpg'),
+} as const;
