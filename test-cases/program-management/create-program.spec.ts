@@ -9,7 +9,7 @@ import {
   fillTabFoto,
   fillTabPaymentLimitation,
   fillTabSalesFee,
-} from '../../helpers/elements/program-mgmt.helper';
+} from '../../helpers/elements/program.helper';
 
 test.describe.serial('Create Program Flow', () => {
 

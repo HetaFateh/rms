@@ -7,7 +7,7 @@ import {
   navigateToProgramApproval,
   clickApproveIcon,
   submitApproval,
-} from '../../helpers/elements/appr-program.helper';
+} from '../../helpers/elements/program.helper';
 
 const PROGRAM_NAME = TEST_DATA.program.name;
 

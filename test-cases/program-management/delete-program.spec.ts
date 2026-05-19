@@ -8,7 +8,7 @@ import {
   navigateToProgramManagement,
   clickDeleteIcon,
   confirmDeletion,
-} from '../../helpers/elements/program-mgmt.helper';
+} from '../../helpers/elements/program.helper';
 
 const PROGRAM_NAME = TEST_DATA.program.name;
 

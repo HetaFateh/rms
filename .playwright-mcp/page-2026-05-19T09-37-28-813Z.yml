@@ -1,0 +1,38 @@
+- generic [ref=e1]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - img [ref=e7]
+      - generic [ref=e8]:
+        - button [ref=e21] [cursor=pointer]: Masuk
+        - button [ref=e22] [cursor=pointer]: Daftar
+    - img [ref=e12]
+    - generic [ref=e14]:
+      - paragraph [ref=e15]: Nikmati Keuntungan Dengan Menjadi Anggota Telkomsel
+      - img [ref=e16]
+      - button [ref=e23] [cursor=pointer]: Daftar Sekarang
+      - link [ref=e24] [cursor=pointer]:
+        - /url: /main/faq
+        - text: Pelajari Lebih Lanjut
+  - alert [ref=e20]
+  - dialog [ref=e27]:
+    - generic [ref=e30]:
+      - tablist "Tabs" [ref=e31]:
+        - tab "Login" [selected] [ref=e32] [cursor=pointer]
+        - tab "Daftar" [ref=e33] [cursor=pointer]
+      - tabpanel "Login" [active] [ref=e35]:
+        - generic [ref=e36]:
+          - img [ref=e37]
+          - paragraph [ref=e38]: Masuk ke Akun
+          - generic [ref=e39]:
+            - generic [ref=e40]:
+              - generic [ref=e41]: Username
+              - textbox "Masukkan username" [ref=e44]
+            - generic [ref=e45]:
+              - generic [ref=e46]: Password
+              - textbox "Masukkan password" [ref=e49]
+            - generic [ref=e50]:
+              - button "Masuk" [ref=e51] [cursor=pointer]
+              - generic [ref=e52]:
+                - text: Lupa password?
+                - link "Klik disini." [ref=e53] [cursor=pointer]:
+                  - /url: ""
