@@ -41,6 +41,9 @@ export const testToggle = {
   /** TC-UP-001: View and edit user profile */
   runEditProfile:         true,
 
+  /** TC-UM-002: Admin registers a new Agent */
+  runRegisterAgent:       true,
+
   // ── Dashboard ─────────────────────────────────────────────────────────────
   /** TC-DB-001, TC-DB-002: Dashboard navigation and menu exploration */
   runDashboardNavigation: true,

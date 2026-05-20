@@ -31,7 +31,6 @@ export default defineConfig({
     screenshot: 'off',
     ignoreHTTPSErrors: true,
     launchOptions: {
-      executablePath: '/usr/bin/google-chrome-stable',
       args: ['--disable-web-security'],
     },
   },

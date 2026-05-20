@@ -1,12 +1,8 @@
+/** Locators and actions for Program Management and Program Approval flows. */
 import { Page, Locator } from '@playwright/test';
 import { sidebarElements } from './global.elements';
 import { TEST_DATA } from '../data.helper';
 
-// ══════════════════════════════════════════════════════════════════════════════
-// SECTION 1 – SHARED LOW-LEVEL HELPERS
-// ══════════════════════════════════════════════════════════════════════════════
-
-/** Expand a sidebar group button then click a link inside it. */
 async function navigateSidebar(
   page: Page,
   groupBtn: Locator,
@@ -17,7 +13,6 @@ async function navigateSidebar(
   await link.click();
 }
 
-/** Find a table row by text and click a button at the given index. */
 async function clickTableRowButton(
   page: Page,
   rowText: string,
@@ -26,12 +21,6 @@ async function clickTableRowButton(
   const row = page.getByRole('row').filter({ hasText: rowText });
   await row.getByRole('button').nth(buttonIndex).click();
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// SECTION 2 – ELEMENT FACTORIES
-// ══════════════════════════════════════════════════════════════════════════════
-
-// ── Tab: Program (main data form) ─────────────────────────────────────────────
 
 export const tabProgramElements = (page: Page) => ({
   inputNama:               page.locator('input[name="NAMA"]'),
@@ -52,20 +41,20 @@ export const tabProgramElements = (page: Page) => ({
   spinbuttonTanggalAkhir:  page.getByRole('spinbutton').nth(2),
   spinbuttonBulanAkhir:    page.getByRole('spinbutton').nth(3),
 
-  // ⚠️ React-Select auto-generated CSS classes — replace with data-testid when available.
+  // fragile: React-Select auto-generated CSS classes — replace with data-testid when available.
   dropdownKategori:     page.locator('.css-19bb58m').first(),
   dropdownSubKategori:  page.locator('.css-hlgwow > .css-19bb58m').first(),
   dropdownProduk:       page.locator(
     '.mb-3 > .css-b62m3t-container > .css-13cymwt-control > .css-hlgwow > .css-19bb58m'
   ),
-  // ⚠️ Product dropdown in EDIT mode (different position)
+  // fragile: Product dropdown in EDIT mode (different position)
   dropdownProdukEdit:   page.locator(
     'div:nth-child(10) > div > .css-b62m3t-container > .css-13cymwt-control > .css-hlgwow > .css-19bb58m'
   ),
   dropdownChannel:      page.locator(
     'div:nth-child(7) > div > .css-b62m3t-container > .css-13cymwt-control > .css-hlgwow > .css-19bb58m'
   ),
-  // ⚠️ Customer Bonus dropdown
+  // fragile: Customer Bonus dropdown
   dropdownCustomerBonus: page.locator('.css-b62m3t-container').filter({ hasText: 'Customer Bonus' }).locator('.css-19bb58m'),
 
   optionKvKategoriProgram: page.getByRole('option', { name: 'KV Kategori Program' }),
@@ -80,8 +69,6 @@ export const tabProgramElements = (page: Page) => ({
   btnSimpan:            page.getByRole('button', { name: 'Simpan' }),
 });
 
-// ── Tab: Foto ─────────────────────────────────────────────────────────────────
-
 export const tabFotoElements = (page: Page) => ({
   tabFoto:              page.getByRole('tab',     { name: 'Foto' }),
   uploadFoto:           page.getByRole('tabpanel', { name: 'Foto' }).locator('input[type="file"]'),
@@ -90,8 +77,6 @@ export const tabFotoElements = (page: Page) => ({
   inputWording:         page.getByRole('textbox', { name: 'Nikmati Promo {Produk} Segera' }),
   btnTambahWording:     page.getByRole('button',  { name: 'Tambah Wording' }),
 });
-
-// ── Tab: Payment Limitation ───────────────────────────────────────────────────
 
 export const tabPaymentLimitationElements = (page: Page) => ({
   tabPaymentLimitation: page.getByRole('tab',     { name: 'Payment Limitation' }),
@@ -102,8 +87,6 @@ export const tabPaymentLimitationElements = (page: Page) => ({
   btnSimpan:            page.getByRole('button', { name: 'Simpan' }),
 });
 
-// ── Tab: Sales Fee ────────────────────────────────────────────────────────────
-
 export const tabSalesFeeElements = (page: Page) => ({
   tabSalesFee:         page.getByRole('tab',     { name: 'Sales Fee' }),
   comboboxPeriod:      page.getByRole('combobox'),
@@ -112,13 +95,9 @@ export const tabSalesFeeElements = (page: Page) => ({
   btnSimpan:           page.getByRole('button', { name: 'Simpan' }),
 });
 
-// ── Program List (table) ──────────────────────────────────────────────────────
-
 export const programListElements = (page: Page) => ({
   inputSearch: page.getByRole('textbox', { name: 'Search' }),
 });
-
-// ── Approval Modal ────────────────────────────────────────────────────────────
 
 export const approvalFormElements = (page: Page) => ({
   radioApprove: page.getByRole('radio').first(),
@@ -126,15 +105,9 @@ export const approvalFormElements = (page: Page) => ({
   btnKirim:     page.getByRole('button', { name: 'Kirim' }),
 });
 
-// ── Delete Confirmation Modal ─────────────────────────────────────────────────
-
 export const deleteModalElements = (page: Page) => ({
   btnConfirmDelete: page.getByRole('button', { name: 'Ya' }),
 });
-
-// ══════════════════════════════════════════════════════════════════════════════
-// SECTION 3 – NAVIGATION ACTIONS
-// ══════════════════════════════════════════════════════════════════════════════
 
 export async function navigateToCreateProgram(page: Page): Promise<void> {
   const sidebar = sidebarElements(page);
@@ -153,10 +126,6 @@ export async function navigateToProgramApproval(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle');
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// SECTION 4 – PROGRAM MANAGEMENT ACTIONS
-// ══════════════════════════════════════════════════════════════════════════════
-
 export async function fillTabProgram(page: Page, imagePath: string): Promise<void> {
   const el = tabProgramElements(page);
   const d = TEST_DATA.program;
@@ -167,7 +136,7 @@ export async function fillTabProgram(page: Page, imagePath: string): Promise<voi
   await el.textareaInfo.fill(d.name);
   await el.inputPromoId.fill(d.benefit);
 
-  // ⚠️ React-Select dropdowns — brittle CSS selectors
+  // fragile: React-Select dropdowns — brittle CSS selectors
   await el.dropdownKategori.click();
   await el.optionKvKategoriProgram.click();
   await el.dropdownSubKategori.click();
@@ -239,12 +208,10 @@ export async function searchProgram(page: Page, programName: string): Promise<vo
   await page.waitForLoadState('networkidle');
 }
 
-/** Click the 🗑 delete icon (3rd button) for the row matching `programName`. */
 export async function clickDeleteIcon(page: Page, programName: string): Promise<void> {
   await clickTableRowButton(page, programName, 2);
 }
 
-/** Click the ✏️ edit icon (2nd button) for the row matching `programName`. */
 export async function clickEditIcon(page: Page, programName: string): Promise<void> {
   await clickTableRowButton(page, programName, 1);
 }
@@ -324,11 +291,6 @@ export async function extendProgramEndDate(page: Page, newEndDay: string, newEnd
   await bulanAkhir.fill(newEndMonth);
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// SECTION 5 – PROGRAM APPROVAL ACTIONS
-// ══════════════════════════════════════════════════════════════════════════════
-
-/** Click the ☑ approve icon for the row matching `programName`. */
 export async function clickApproveIcon(page: Page, programName: string): Promise<void> {
   const row = page.getByRole('row').filter({ hasText: programName });
   await row.getByRole('button', { name: '☑' }).first().click();

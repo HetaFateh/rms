@@ -1,3 +1,4 @@
+/** Custom Playwright test fixture with automatic screenshot capture and API/console error tracking. */
 import { test as baseTest, expect as baseExpect } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
@@ -14,13 +15,6 @@ interface ApiLogEntry {
     statusText: string;
 }
 
-/**
- * Custom Playwright Test Fixture
- * ──────────────────────────────────────────────────────────────────────────────
- * Extends Playwright with automatic screenshot capture and API/console error
- * tracking. Only errors (API 4xx/5xx + browser console errors) are surfaced.
- * If no errors exist, nothing is printed — the test just passes cleanly.
- */
 export const test = baseTest.extend<{}>({
     page: async ({ page }, use, testInfo) => {
         const apiLogs: ApiLogEntry[] = [];
@@ -52,12 +46,10 @@ export const test = baseTest.extend<{}>({
         const safeTitle = testInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
         const timestamp = Date.now();
 
-        // Screenshot
         const screenshotFile = path.join(EVIDENCE_DIR, `${safeTitle}-${timestamp}.jpg`);
         await page.screenshot({ type: 'jpeg', quality: 50, fullPage: false, path: screenshotFile });
         await testInfo.attach(`Screenshot [${label}]`, { path: screenshotFile, contentType: 'image/jpeg' });
 
-        // Collect errors only (4xx/5xx API + console errors)
         const apiErrors = apiLogs.filter(l => l.status >= 400);
         const hasErrors = apiErrors.length > 0 || consoleErrors.length > 0;
 

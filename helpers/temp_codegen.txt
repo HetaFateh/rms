@@ -1,27 +1,20 @@
-RULES:
-- DO NOT EDIT ANYTHING IN THIS FILE
-- The website link is https://dashboard.rms.dev.atklik.xyz/
-- The credential is on the .env file, use it carefully
-- Just do the steps as instructed to minimize token consumption
-- If you find any error that repeated over than 3 times, please stop the test and ask for help
+// Clear this file after migrating codegen output
 
-----------------------------------------------------------------------------------------
-
-Edit Existing Program Flow:
-1. Login as Admin
-2. Search the existing program by name
-3. Click edit button
-4. Click the date picker than change the date to be longer then before
-   this is the locator (just for example) :    await page.goto('https://dashboard.rms.dev.atklik.xyz/auth/login');
-                            await page.getByRole('textbox', { name: 'Select date range' }).click();
-                            await page.getByRole('gridcell', { name: 'Choose Tuesday, May 19th,' }).click();
-                            await page.getByRole('gridcell', { name: 'Choose Sunday, May 31st,' }).click();
-   the first date choosen should be refer to the day before the current day (e.g. if today is May 20th, choose May 19th)
-   the last date choosen should be the first day plus 12 days (e.g. if the first date is May 19th, choose May 31st)
-5. Click save button
-6. Logout
-7. Login as Approver
-8. Go to Approval Program feature
-9. Search the program by name
-10. Click the "Approve" button and so on
-11. Logout
+Register Agent Flow:
+1. login as Admin
+2. Go to "User" menu
+3. click "tambah" button ==await page.getByRole('link', { name: 'Tambah' }).click();
+4. fill the form with this data (add this to data.helper.ts):
+    foto profile = C:\Users\asset\OneDrive\Pictures\Saved Pictures\promofm.jpg ==await page.locator('label').click();
+    nama = "Agent Automation Only" ==await page.locator('input[name="NAMA"]').click();
+    jenis kelamin = choose "laki-laki" ==await page.locator('select[name="JENIS_KELAMIN"]').selectOption('L');
+    tanggal lahir = enter random date before this day ==locator('input[name="TANGGAL_LAHIR"]')
+    alamat = "Jl. Jend. Sudirman No. 1, Jakarta Pusat" ==await page.locator('input[name="ADDRESS"]').click();
+    kota = choose "HQ" ==await page.locator('#kota_id').selectOption('491');
+    email = "agentautomationonly@getnada.com" ==await page.locator('input[name="EMAIL"]').click();
+    no hp = enter random phone number with format 081xxxxxxxxx ==await page.getByRole('spinbutton').click();
+    password = "password" ==await page.locator('input[name="PASSWORD"]').click();
+    role = choose "Agent" ==await page.locator('select[name="ROLE_ID"]').selectOption('2');
+    asal register = choose "umum" ==await page.locator('#asal-register').selectOption('1');
+5. click "simpan" button ==await page.getByRole('button', { name: 'Simpan' }).click();
+6. verify success popup
