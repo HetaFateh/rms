@@ -1,20 +1,8 @@
-// Clear this file after migrating codegen output
+Read this instruction first:
+- After created new user as Agent, save that email as temporary variable and use it to verify account as Agent.
+- The create agent test case is connected to verify account by agent test case, so it's a e2e test case but created it as 2 test case (the flow is create agent, then logout, then verify account by that agent)
+- 
 
-Register Agent Flow:
-1. login as Admin
-2. Go to "User" menu
-3. click "tambah" button ==await page.getByRole('link', { name: 'Tambah' }).click();
-4. fill the form with this data (add this to data.helper.ts):
-    foto profile = C:\Users\asset\OneDrive\Pictures\Saved Pictures\promofm.jpg ==await page.locator('label').click();
-    nama = "Agent Automation Only" ==await page.locator('input[name="NAMA"]').click();
-    jenis kelamin = choose "laki-laki" ==await page.locator('select[name="JENIS_KELAMIN"]').selectOption('L');
-    tanggal lahir = enter random date before this day ==locator('input[name="TANGGAL_LAHIR"]')
-    alamat = "Jl. Jend. Sudirman No. 1, Jakarta Pusat" ==await page.locator('input[name="ADDRESS"]').click();
-    kota = choose "HQ" ==await page.locator('#kota_id').selectOption('491');
-    email = "agentautomationonly@getnada.com" ==await page.locator('input[name="EMAIL"]').click();
-    no hp = enter random phone number with format 081xxxxxxxxx ==await page.getByRole('spinbutton').click();
-    password = "password" ==await page.locator('input[name="PASSWORD"]').click();
-    role = choose "Agent" ==await page.locator('select[name="ROLE_ID"]').selectOption('2');
-    asal register = choose "umum" ==await page.locator('#asal-register').selectOption('1');
-5. click "simpan" button ==await page.getByRole('button', { name: 'Simpan' }).click();
-6. verify success popup
+Verify Account by Agent Flow:
+1. login using Agent temporary email that just been created, the password is always "password"
+2. 
