@@ -7,16 +7,17 @@ import {
   navigateToSubscribeApproval,
   searchAgent,
   clickApprovalButton,
-  submitApproval,
+  selectReject,
+  submitRejection,
 } from '../../helpers/elements/subs-appr.helper';
 
-test.describe.serial('Subscription Approval Flow', () => {
+test.describe.serial('Subscription Rejection Flow', () => {
 
   test.beforeAll(() => {
-    if (!testToggle.runApproveSubscription) test.skip();
+    if (!testToggle.runRejectSubscription) test.skip();
   });
 
-  test('TC-SA-001 | Admin approves a subscription – full happy path', async ({ page }) => {
+  test('TC-SA-002 | Admin rejects a subscription', async ({ page }) => {
 
     await test.step('Admin: Login', async () => {
       await login(page, 'admin');
@@ -26,16 +27,20 @@ test.describe.serial('Subscription Approval Flow', () => {
       await navigateToSubscribeApproval(page);
     });
 
-    await test.step('Admin: Search for agent by name', async () => {
-      await searchAgent(page, TEST_DATA.agent.name);
+    await test.step('Admin: Search for subscription by name', async () => {
+      await searchAgent(page, TEST_DATA.subscription.searchTerm);
     });
 
-    await test.step('Admin: Click Approval button on first matching row', async () => {
+    await test.step('Admin: Click Approval button on matching row', async () => {
       await clickApprovalButton(page);
     });
 
-    await test.step('Admin: Submit approval by clicking Kirim', async () => {
-      await submitApproval(page);
+    await test.step('Admin: Select Reject radio button', async () => {
+      await selectReject(page);
+    });
+
+    await test.step('Admin: Submit rejection by clicking Kirim', async () => {
+      await submitRejection(page);
     });
 
     await test.step('Admin: Verify success toast', async () => {
@@ -49,3 +54,5 @@ test.describe.serial('Subscription Approval Flow', () => {
   });
 
 });
+
+// Made with Bob

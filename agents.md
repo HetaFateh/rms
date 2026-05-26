@@ -256,11 +256,17 @@ rms/
 │   │   ├── approve-existing-program.spec.ts  # TC-PA-002
 │   │   └── approve-program-e2e.spec.ts       # TC-PA-E2E-001
 │   ├── subscription-approval/
-│   │   └── subscription-approval.spec.ts     # TC-SA-001 (stub, disabled)
+│   │   └── subscription-approval.spec.ts     # TC-SA-001
 │   ├── user-management/
 │   │   └── edit-profile.spec.ts              # TC-UP-001
-│   └── dashboard/
-│       └── dashboard-navigation.spec.ts      # TC-DB-001, TC-DB-002
+│   ├── dashboard/
+│   │   └── dashboard-navigation.spec.ts      # TC-DB-001, TC-DB-002
+│   ├── brand-management/
+│   │   └── brand-management.spec.ts          # TC-BM-E2E-001
+│   ├── bank-management/
+│   │   └── bank-management.spec.ts           # TC-BANK-E2E-001
+│   └── channel-management/
+│       └── channel-management.spec.ts        # TC-CH-E2E-001
 ├── test-assets/
 │   └── promofm.jpg
 ├── evidence/                     # auto-generated screenshots and API logs — gitignored
@@ -328,15 +334,18 @@ See [skills.md](skills.md) for the full table and implementation recipes.
 
 | ID | Toggle key | Status | File | Description |
 |----|-----------|--------|------|-------------|
-| TC-PM-001 | `runCreateProgram` | enabled | `create-program.spec.ts` | Admin creates program across all 4 tabs, verifies toast |
+| TC-PM-001 | `runCreateProgram` | disabled | `create-program.spec.ts` | Admin creates program across all 4 tabs, verifies toast |
 | TC-PM-002 | `runDeleteProgram` | disabled | `delete-program.spec.ts` | Admin deletes program from list |
-| TC-PM-E2E-001 | `runEditProgramE2E` | enabled | `edit-program-e2e.spec.ts` | Admin edits date range, Approver approves |
-| TC-PA-002 | `runApproveExistingProgram` | enabled | `approve-existing-program.spec.ts` | Approver approves an existing program |
-| TC-PA-E2E-001 | `runApproveProgramE2E` | enabled | `approve-program-e2e.spec.ts` | Admin creates a program, Approver approves it |
-| TC-SA-001 | `runApproveSubscription` | disabled | `subscription-approval.spec.ts` | Stub — not yet implemented |
-| TC-UP-001 | `runEditProfile` | enabled | `edit-profile.spec.ts` | Admin navigates to Edit Profile, verifies URL |
-| TC-DB-001 | `runDashboardNavigation` | enabled | `dashboard-navigation.spec.ts` | Dashboard URL verification |
-| TC-DB-002 | `runDashboardNavigation` | enabled | `dashboard-navigation.spec.ts` | Expands all 6 sidebar groups |
+| TC-PM-E2E-001 | `runEditProgramE2E` | disabled | `edit-program-e2e.spec.ts` | Admin edits date range, Approver approves |
+| TC-PA-002 | `runApproveExistingProgram` | disabled | `approve-existing-program.spec.ts` | Approver approves an existing program |
+| TC-PA-E2E-001 | `runApproveProgramE2E` | disabled | `approve-program-e2e.spec.ts` | Admin creates a program, Approver approves it |
+| TC-SA-001 | `runApproveSubscription` | disabled | `subscription-approval.spec.ts` | Admin approves a subscription — full happy path |
+| TC-UP-001 | `runEditProfile` | disabled | `edit-profile.spec.ts` | Admin navigates to Edit Profile, verifies URL |
+| TC-DB-001 | `runDashboardNavigation` | disabled | `dashboard-navigation.spec.ts` | Dashboard URL verification |
+| TC-DB-002 | `runDashboardNavigation` | disabled | `dashboard-navigation.spec.ts` | Expands all 6 sidebar groups |
+| TC-BM-E2E-001 | `runBrandManagement` | disabled | `brand-management.spec.ts` | Admin creates, edits, and deletes a brand in single flow |
+| TC-BANK-E2E-001 | `runBankManagement` | disabled | `bank-management.spec.ts` | Admin creates, edits, and deletes a bank in single flow |
+| TC-CH-E2E-001 | `runChannelManagement` | enabled | `channel-management.spec.ts` | Admin creates, edits, and deletes a channel in single flow |
 
 Note: all program-related tests read the program name from `TEST_DATA.program.name` in `data.helper.ts`. Changing that value affects every spec that searches for or interacts with that program.
 
@@ -388,7 +397,7 @@ After recording:
 6. Apply naming conventions from the prefix table above
 7. Mark any fragile CSS selectors with a `// fragile:` comment
 8. Add test data to `helpers/data.helper.ts` if needed
-9. Clear `helpers/temp_codegen.txt`
+9. **DO NOT clear or edit `helpers/temp_codegen.txt`** — it is managed by the user only
 
 ---
 
@@ -446,16 +455,27 @@ test('Create program', async ({ page }) => {
 
 ### Standard workflow for implementing a feature
 
-1. Read this file
-2. Read `skills.md` for the relevant recipe
-3. Add the toggle to `test.config.ts`
-4. Check `helpers/elements/` for reusable locators
-5. Read related spec files
-6. Implement using the two-section helper file pattern
-7. Add test data to `data.helper.ts` if needed
-8. Write the spec with `test.step()` labels
-9. Clear `temp_codegen.txt` if it was used
-10. Run the spec locally to verify
+1. Read `AGENTS.md` and `skills.md` before every request — they are the single source of truth
+2. Add the toggle to `test.config.ts`
+3. Check `helpers/elements/` for reusable locators
+4. Read related spec files
+5. Implement using the two-section helper file pattern
+6. Add test data to `data.helper.ts` — make all values env-configurable so they are reusable across specs
+7. Write the spec with `test.step()` labels, placing the file under `test-cases/`
+8. Run the new spec locally before marking the work done
+9. **NEVER edit `helpers/temp_codegen.txt`** — it is managed exclusively by the user
+10. Prioritize token efficiency — be concise in both code and responses
+11. If a file is no longer needed, flag it for deletion rather than leaving dead code
+
+---
+
+## Response Style
+
+All responses must be:
+- **Simple and direct** — no unnecessary preamble
+- **Detailed and comprehensive** — cover everything relevant
+- **Easy to read** — use tables, bullet lists, and code blocks
+- Elaborate only when the user explicitly asks for it
 
 ---
 
@@ -552,12 +572,104 @@ await page.screenshot({ path: `./evidence/debug-${Date.now()}.jpg` });
 
 ---
 
+## Common Mistakes and Lessons Learned
+
+This section documents recurring mistakes to avoid in future implementations.
+
+### Mistake 1: Splitting sequential flows into separate tests
+
+**Problem:** Creating separate `test()` blocks for sequential operations (create → edit → delete) causes Playwright to create new browser contexts between tests, closing the page and losing session state.
+
+**Symptom:** Tests fail with "Target page, context or browser has been closed" error after the first test completes.
+
+**Solution:** Combine sequential operations into a single E2E test with multiple `test.step()` blocks.
+
+```typescript
+// wrong — separate tests lose browser context
+test('Create brand', async ({ page }) => { ... });
+test('Edit brand', async ({ page }) => { ... });  // fails — page is closed
+test('Delete brand', async ({ page }) => { ... }); // fails — page is closed
+
+// right — single E2E test maintains context
+test('TC-BM-E2E-001 | Create, Edit, and Delete brand', async ({ page }) => {
+  await test.step('Admin: Create brand', async () => { ... });
+  await test.step('Admin: Edit brand', async () => { ... });
+  await test.step('Admin: Delete brand', async () => { ... });
+});
+```
+
+### Mistake 2: Not waiting for modals or forms to appear
+
+**Problem:** Clicking a button that opens a modal/form, then immediately trying to interact with elements inside it before they're visible.
+
+**Symptom:** Timeout errors like "waiting for locator('#name')" when the element exists but hasn't rendered yet.
+
+**Solution:** Add explicit wait for the element to be visible before interacting with it.
+
+```typescript
+// wrong — assumes modal is instantly visible
+await el.btnTambah.click();
+await el.inputName.fill(brandName);  // may fail if modal is still opening
+
+// right — wait for element to be visible
+await el.btnTambah.click();
+await el.inputName.waitFor({ state: 'visible', timeout: 10_000 });
+await el.inputName.fill(brandName);
+```
+
+### Mistake 3: Assuming page stays on the same URL after actions
+
+**Problem:** After creating/editing/deleting an item, the page may redirect or show a success modal, making the sidebar or other navigation elements temporarily unavailable.
+
+**Solution:** For sequential operations in the same test, navigate back to the required page explicitly or close modals before the next step.
+
+```typescript
+// wrong — assumes we're still on the Brand page after create
+await createBrand(page, brandName);
+await editBrand(page, oldName, newName);  // fails — page may have redirected
+
+// right — navigate back to Brand page between operations
+await createBrand(page, brandName);
+await sidebar.btnSetting.click();
+await sidebar.linkBrand.click();
+await editBrand(page, oldName, newName);
+```
+
+### Mistake 4: Editing `helpers/temp_codegen.txt`
+
+**Problem:** Clearing or modifying `helpers/temp_codegen.txt` after implementing features, thinking it's a temporary scratch file.
+
+**Reality:** This file is managed exclusively by the user and should NEVER be modified by agents.
+
+**Solution:** Read from it, implement the features, but leave the file untouched.
+
+### Mistake 5: Asserting table visibility without re-searching after an edit
+
+**Problem:** After editing an item (which internally calls `searchChannel(oldName)`), the search bar retains the old name. Calling `expectChannelVisible(newName)` then fails because the table is still filtered by the old term.
+
+**Symptom:** `expect(locator).toBeVisible()` times out even though the edit succeeded — the new name simply isn't in the filtered results.
+
+**Solution:** Any `expectXxxVisible` helper should call `searchXxx(channelName)` first to reset the filter before asserting.
+
+```typescript
+// wrong — table still filtered by old name after edit
+await editChannel(page, name1, name2, code2);
+await expectChannelVisible(page, name2); // fails
+
+// right — expectChannelVisible searches first internally
+export async function expectChannelVisible(page: Page, channelName: string): Promise<void> {
+  await searchChannel(page, channelName); // reset the search filter
+  await expect(getChannelCell(page, channelName)).toBeVisible({ timeout: 10_000 });
+}
+```
+
+---
+
 ## Checklist for New Features
 
 Before writing any code:
 
-- [ ] Read this file
-- [ ] Read `skills.md` for the relevant recipe
+- [ ] Read `AGENTS.md` and `skills.md`
 - [ ] Add toggle to `test.config.ts`
 - [ ] Check `helpers/elements/` for reusable locators
 - [ ] Review similar existing specs
@@ -569,20 +681,22 @@ While implementing:
 - [ ] Follow the two-section helper file pattern (Section 1 locators, Section 2 actions)
 - [ ] Format `test.step()` labels as `'Role: Action'`
 - [ ] Mark fragile CSS selectors with a `// fragile:` comment
-- [ ] Add test data to `helpers/data.helper.ts`
+- [ ] Add test data to `helpers/data.helper.ts` — all values must be env-configurable
 - [ ] Guard spec with toggle in `beforeAll`
 - [ ] Use `test.describe.serial` for all suites
 - [ ] Clear state in `afterAll` if using the state manager
 - [ ] Read credentials from `process.env` only — never hardcode
+- [ ] Place spec file under `test-cases/<feature>/`
+- [ ] Do not leave dead or unused files — flag them for deletion
 
 After implementation:
 
-- [ ] Clear `helpers/temp_codegen.txt` if it was used
-- [ ] Run the spec locally
+- [ ] **NEVER edit `helpers/temp_codegen.txt`** — user manages this file exclusively
+- [ ] Run the new spec locally to verify it passes
 - [ ] Check `evidence/` folder for screenshots and logs
 
 ---
 
-Last updated: 2026-05-19
+Last updated: 2026-05-26
 Maintained by: QA team
 Companion file: [skills.md](skills.md)

@@ -25,5 +25,58 @@ export const TEST_DATA = {
     roleId:       '2',
     asalRegister: '1',
   },
+  subscription: {
+    searchTerm: 'kv program',
+  },
+  brand: {
+    name: () => `brand${Date.now().toString().slice(-8)}`,
+  },
+  bank: {
+    name: () => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz';
+      let result = 'bnk';
+      for (let i = 0; i < 7; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    },
+    code: () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let result = 'BNK';
+      for (let i = 0; i < 7; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    },
+  },
+  channel: {
+    /** Generates a random lowercase alpha string: 'chn' + 7 letters = 10 chars max. */
+    name: () => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz';
+      let r = 'chn';
+      for (let i = 0; i < 7; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+      return r;
+    },
+    /** Generates a random uppercase alpha string: 'CHN' + 7 letters = 10 chars max. */
+    code: () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let r = 'CHN';
+      for (let i = 0; i < 7; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+      return r;
+    },
+    /** Generates a random lowercase alpha string: 'dsc' + 7 letters = 10 chars max. */
+    desc: () => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz';
+      let r = 'dsc';
+      for (let i = 0; i < 7; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+      return r;
+    },
+  },
+  redeem: {
+    poin:             '1000',
+    minimumPoinRedeem: '500',
+    hari:             '2',
+    adminFee:         '250',
+  },
   imagePath: path.join(__dirname, '../test-assets/promofm.jpg'),
 } as const;

@@ -1,8 +1,19 @@
-Read this instruction first:
-- After created new user as Agent, save that email as temporary variable and use it to verify account as Agent.
-- The create agent test case is connected to verify account by agent test case, so it's a e2e test case but created it as 2 test case (the flow is create agent, then logout, then verify account by that agent)
-- 
+Insight about this flow:
+- after implementing it, run the test ONLY FOR THIS TEST CASE (disable all test case except this)
 
-Verify Account by Agent Flow:
-1. login using Agent temporary email that just been created, the password is always "password"
-2. 
+
+
+Create new test case for this use case:
+A. create redeem flow:
+    1. login as admin
+    2. go to redeem ==await page.getByRole('link', { name: 'Redeem' }).click();
+    3. click tambah button
+    4. enter poin field (1000) ==await page.locator('input[name="POIN"]').click();
+    5. enter minimum poin redeem field (500) ==await page.locator('input[name="MINIMUM_POIN_REDEEM"]').click();
+    6. enter start date field (click today/the day the test ran) ==await page.locator('#expired-start-date').fill('2026-05-26');
+    7. enter end date field (add 7 days after start date) ==await page.locator('#expired-end-date').fill('2026-05-31');
+    8. enter batas notifikasi expired poin (2) ==await page.locator('#hari').fill('2');
+    9. enter admin fee field (250) ==await page.locator('input[name="ADMIN_FEE"]').click();
+    10. click simpan button
+    11. verify success popup
+
