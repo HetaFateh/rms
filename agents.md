@@ -467,6 +467,30 @@ test('Create program', async ({ page }) => {
 10. Prioritize token efficiency — be concise in both code and responses
 11. If a file is no longer needed, flag it for deletion rather than leaving dead code
 
+### CRITICAL: When to stop and ask for user input
+
+**STOP IMMEDIATELY and ask the user for clarification if:**
+
+1. **Locator confusion**: The locators from `temp_codegen.txt` don't match what you're seeing in screenshots, or different flows (create vs edit) use different selectors
+2. **Missing codegen**: The user's instructions reference UI elements but `temp_codegen.txt` doesn't contain the corresponding locators
+3. **Unclear flow**: You're unsure whether a form opens as a modal, navigates to a new page, or stays on the same page
+4. **Repeated failures**: The same test step fails more than twice with different attempted fixes
+5. **Ambiguous requirements**: The task description is unclear about expected behavior
+
+**DO NOT:**
+- Make multiple guesses at locators without user confirmation
+- Try 3+ different approaches to fix the same error
+- Modify working code from other test cases to "fix" the current issue
+- Continue debugging beyond 2 failed attempts without asking for help
+
+**Token efficiency rule**: One failed attempt with a screenshot is worth asking the user. Two failed attempts is the absolute maximum before you MUST stop and ask.
+
+**Example of when to stop:**
+```
+❌ Wrong: Try locator A → fails → try locator B → fails → try locator C → fails
+✅ Right: Try locator A → fails → check screenshot → ASK USER for correct locator
+```
+
 ---
 
 ## Response Style

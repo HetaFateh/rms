@@ -72,6 +72,29 @@ export const TEST_DATA = {
       return r;
     },
   },
+  kategoriProgram: {
+    /** Generates a random lowercase alpha string: 'kp' + 8 letters = 10 chars max. */
+    nama: () => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz';
+      let r = 'kp';
+      for (let i = 0; i < 8; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+      return r;
+    },
+    /** Generates a random lowercase alpha string: 'kpc' + 7 letters = 10 chars max. */
+    kode: () => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz';
+      let r = 'kpc';
+      for (let i = 0; i < 7; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+      return r;
+    },
+    /** Generates a random lowercase alpha string: 'kpd' + 7 letters = 10 chars max. */
+    deskripsi: () => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz';
+      let r = 'kpd';
+      for (let i = 0; i < 7; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+      return r;
+    },
+  },
   redeem: {
     poin:             '1000',
     minimumPoinRedeem: '500',

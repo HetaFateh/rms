@@ -32,6 +32,9 @@ export const testToggle = {
   // ── Bank Management ───────────────────────────────────────────────────────
   runBankManagement:      false,  // TC-BANK-E2E-001: Create, Edit, Delete bank in single flow
 
+  // ── Kategori Program Management ───────────────────────────────────────────
+  runKategoriProgramManagement: true,  // TC-KP-E2E-001: Create, Edit, Delete kategori program in single flow
+
 } as const;
 
 export function getDisabledToggles(): string[] {

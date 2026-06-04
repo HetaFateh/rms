@@ -4,16 +4,30 @@ Insight about this flow:
 
 
 Create new test case for this use case:
-A. create redeem flow:
+A. create kategori program flow:
     1. login as admin
-    2. go to redeem ==await page.getByRole('link', { name: 'Redeem' }).click();
-    3. click tambah button
-    4. enter poin field (1000) ==await page.locator('input[name="POIN"]').click();
-    5. enter minimum poin redeem field (500) ==await page.locator('input[name="MINIMUM_POIN_REDEEM"]').click();
-    6. enter start date field (click today/the day the test ran) ==await page.locator('#expired-start-date').fill('2026-05-26');
-    7. enter end date field (add 7 days after start date) ==await page.locator('#expired-end-date').fill('2026-05-31');
-    8. enter batas notifikasi expired poin (2) ==await page.locator('#hari').fill('2');
-    9. enter admin fee field (250) ==await page.locator('input[name="ADMIN_FEE"]').click();
-    10. click simpan button
+    2. await page.getByRole('link', { name: 'Kategori Program' }).click();
+    3. await page.getByRole('button', { name: 'Tambah' }).click();
+    4. await page.locator('input[name="NAMA"]').click();
+    5. await page.locator('input[name="NAMA"]').fill('automation kategori program');
+    6. await page.locator('input[name="KODE"]').click();
+    7. await page.locator('input[name="KODE"]').fill('atcode');
+    8. await page.locator('input[name="DESKRIPSI"]').click();
+    9. await page.locator('input[name="DESKRIPSI"]').fill('automation deskripsi');
+    10. await page.getByRole('button', { name: 'Simpan' }).click();
     11. verify success popup
+  
+B. edit kategori program flow:
+    1. await page.getByRole('textbox', { name: 'Search' }).click();
+    2. await page.getByRole('button').filter({ hasText: /^$/ }).nth(2).click();
+    3. edit the data (only add simple character), this is each of the locator ==await page.locator('#nama').click();
+                                                                                await page.locator('#code').click();
+                                                                                await page.locator('#desc').click();
+    4. submit the data
+    5. verify success popup
 
+C. delete kategori program flow:
+    1. await page.getByRole('textbox', { name: 'Search' }).click();
+    2. await page.getByRole('button').filter({ hasText: /^$/ }).nth(3).click();
+    3. await page.getByRole('button', { name: 'Hapus' }).click();
+    4. verify success popup
