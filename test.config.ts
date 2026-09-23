@@ -1,7 +1,7 @@
 export const testToggle = {
 
   // ── Program Management ────────────────────────────────────────────────────
-  runCreateProgram:       false,
+  runCreateProgram:       true,
   runDeleteProgram:       false,
 
   // ── Program Approval ──────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ export const testToggle = {
   runChannelManagement:   false,  // TC-CH-E2E-001: Create, Edit, Delete channel in single flow
 
   // ── Redeem Management ─────────────────────────────────────────────────────
-  runRedeemManagement:    true,   // TC-RM-001: Admin creates a redeem entry
+  runRedeemManagement:    false,   // TC-RM-001: Admin creates a redeem entry
 
   // ── Bank Management ───────────────────────────────────────────────────────
   runBankManagement:      false,  // TC-BANK-E2E-001: Create, Edit, Delete bank in single flow
